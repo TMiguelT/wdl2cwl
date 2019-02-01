@@ -14,6 +14,36 @@ ch.setLevel(logging.INFO)
 logger.addHandler(ch)
 
 
+def copy_step_outputs_to_workflow_outputs(step, outputs, **kwargs):
+    def _find_type():
+        task = kwargs['tasks'].get(step['id'], "")
+        if task:
+            for output_param in task['outputs']:
+                if output_param['id'] == id:
+                    if 'scatter' in step:
+                        return {'type': 'array',
+                                'items': output_param['type']}
+                    else:
+                        return output_param['type']
+        else:
+            return "Any"
+
+        for output in step['out']:
+            if type(output) is dict:
+                id = output['id']
+            else:
+                id = output
+            outputs.append({
+                "id": step['id'] + '_' + id,
+                "type": _find_type(),
+                "outputSource": '#' + step['id'] + '/' + id
+            })
+
+
+def strip_special_ch(string):
+    return string.strip('"\'')
+
+
 def get_handlers(module_name):
     handlers = {}
 
